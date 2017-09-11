@@ -8,7 +8,11 @@ cf = boto3.resource('cloudformation')
 def get_stack_output(stack_name, key):
     iterator = filter(lambda x: x['OutputKey'] == key,
                       cf.Stack(stack_name).outputs)
-    return next(iterator)['OutputValue']
+    res = next(iterator, None)
+    if not res:
+        raise Exception(
+            'Output for "{}" not found in stack "{}"'.format(key, stack_name))
+    return res['OutputValue']
 
 def render_template(template):
     return Template(template).render(stack_output = get_stack_output)
